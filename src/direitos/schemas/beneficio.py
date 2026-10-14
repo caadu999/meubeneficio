@@ -17,5 +17,23 @@ class Beneficio(BaseModel):
     motivos: list[str]
 
 
-class BeneficioResponse(BaseModel):
+class AvaliacaoResposta(BaseModel):
     beneficios: list[Beneficio]
+
+
+class CriarRequisitos(BaseModel):
+    descricao: str
+
+
+class CriarBeneficio(BaseModel):
+    nome: str
+
+
+class RespostaRequisito(CriarRequisitos):
+    id: int
+
+
+class BeneficioResposta(BaseModel):
+    id: int
+    nome: str
+    requisito: list[RespostaRequisito]
