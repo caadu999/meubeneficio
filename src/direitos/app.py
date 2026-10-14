@@ -41,6 +41,7 @@ def carregar_beneficios(session: Session = Depends(get_session)):
 def cadastrar_beneficio(
     beneficio: CriarBeneficio, session: Session = Depends(get_session)
 ):
+    """Cadastra novos benefícios"""
     novo_beneficio = Beneficio(nome=beneficio.nome)
 
     try:
@@ -64,6 +65,7 @@ def criar_requisitos(
     requisitos: CriarRequisitos,
     session: Session = Depends(get_session),
 ):
+    """Cria novos requisitos para um benefício"""
     beneficio = session.scalar(
         select(Beneficio).where(Beneficio.id == beneficio_id)
     )
@@ -94,10 +96,69 @@ def deletar_requisito(
     beneficio_id: int,
     session: Session = Depends(get_session),
 ):
-    pass
+    """Deleta um benefício pelo ID"""
+
+    benficio = session.scalar(
+        select(Beneficio).where(Beneficio.id == beneficio_id)
+    )
+
+    if benficio is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Benefício não encontrado"
+        )
+
+    requisito = session.scalar(
+        select(Requisitos).where(
+            Requisitos.id == requisito_id
+            and Requisitos.beneficio_id == beneficio_id
+        )
+    )
+
+    if requisito is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Requisito não encontrado"
+        )
+    try:
+        session.delete(requisito)
+        session.commit()
+    except IntegrityError as err:
+        session.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Não foi possível deletar requisito devido a erro de conflito",
+        ) from err
+
+    return {"message": "Requisito deletado com sucesso!"}
+
+
+@app.delete("/beneficios/{beneficio_id}")
+def deletar_beneficio(
+    beneficio_id: int, session: Session = Depends(get_session)
+):
+    """Deleta um benefício pela ID"""
+
+    beneficio = session.scalar(
+        select(Beneficio).where(Beneficio.id == beneficio_id)
+    )
+
+    if beneficio is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Benefício não encontrado"
+        )
+    try:
+        session.delete(beneficio)
+        session.commit()
+    except IntegrityError as err:
+        session.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Não foi possível deletar requisito devido a erro de conflito",
+        ) from err
+    return {"message": "Benefício deletado com sucesso!"}
 
 
 @app.post("/avaliar", response_model=AvaliacaoResposta)
 def avaliar(familia: FamiliaEntrada):
+    """Avalia elegibilidade do usuário para os benefícios"""
     beneficios = verificar_beneficios(familia)
     return {"beneficios": beneficios}
