@@ -32,7 +32,7 @@ def carregar_beneficios(session: SessionDep):
     return dados
 
 
-@router.post("/", response_model=CriarBeneficio)
+@router.post("/", response_model=CriarBeneficio, status_code=HTTPStatus.CREATED)
 def cadastrar_beneficio(beneficio: CriarBeneficio, session: SessionDep):
     """Cadastra novos benefícios"""
     novo_beneficio = Beneficio(nome=beneficio.nome)
@@ -50,7 +50,7 @@ def cadastrar_beneficio(beneficio: CriarBeneficio, session: SessionDep):
     return novo_beneficio
 
 
-@router.post("/{beneficio_id}/requisitos", response_model=RespostaRequisito)
+@router.post("/{beneficio_id}/requisitos", response_model=RespostaRequisito, status_code=HTTPStatus.CREATED)
 def criar_requisitos(
     beneficio_id: int,
     requisitos: CriarRequisitos,
@@ -68,7 +68,7 @@ def criar_requisitos(
     novo_requisito = Requisitos(descricao=requisitos.descricao)
 
     try:
-        beneficio.requisito.routerend(novo_requisito)
+        beneficio.requisito.append(novo_requisito)
         session.commit()
         session.refresh(novo_requisito)
     except IntegrityError as err:
@@ -87,7 +87,7 @@ def deletar_requisito(
     beneficio_id: int,
     session: SessionDep,
 ):
-    """Deleta um benefício pelo ID"""
+    """Deleta um requisito pelo ID"""
 
     benficio = session.scalar(
         select(Beneficio).where(Beneficio.id == beneficio_id)
