@@ -22,5 +22,11 @@ def avaliar_gas_do_povo(
         motivos.append("Família não inscrita no Cadúnico")
 
     return Beneficio(
-        beneficio="Gás do povo", atende=len(motivos) == 0, motivos=motivos
+        beneficio="Gás do povo",
+        atende=len(motivos) == 0,
+        motivos=motivos,
+        renda_por_pessoa=renda_por_pessoa,
+        limite_renda=salario_minimo / 2,
+        idade_minima=None,
+        codigo="gas_do_povo"
     )

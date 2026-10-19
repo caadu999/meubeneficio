@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 from direitos.database.database import get_session
 from direitos.models.beneficio import Beneficio, Requisitos
 from direitos.schemas.beneficio import (
-    AtualizarLimite,
     BeneficioResposta,
     CriarBeneficio,
     CriarRequisitos,
@@ -34,7 +33,7 @@ def carregar_beneficios(session: SessionDep):
 
 
 @router.post(
-    "/", response_model=CriarBeneficio, status_code=HTTPStatus.CREATED
+    "/", response_model=BeneficioResposta, status_code=HTTPStatus.CREATED
 )
 def cadastrar_beneficio(beneficio: CriarBeneficio, session: SessionDep):
     """Cadastra novos benefícios"""
@@ -59,29 +58,11 @@ def cadastrar_beneficio(beneficio: CriarBeneficio, session: SessionDep):
 
 
 @router.patch("/{beneficio_id}", response_model=BeneficioResposta)
-def alterar_limite_beneficio(
-    beneficio_id: int, session: SessionDep, limite: AtualizarLimite
+def atualizar_atributos(
+    beneficio_id: int, session: SessionDep, beneficio: CriarBeneficio
 ):
-    """Altera o limite do benefício selecionado"""
-    beneficio = session.scalar(
-        select(Beneficio).where(Beneficio.id == beneficio_id)
-    )
-
-    if beneficio is None:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="Benefício não encontrado.",
-        )
-    try:
-        beneficio.limite_renda_por_pessoa = limite.novo_limite
-        session.commit()
-        session.refresh(beneficio)
-    except IntegrityError as err:
-        session.rollback()
-        raise HTTPException(
-            status_code=HTTPStatus.CONFLICT, detail="Erro ao atualizar limite"
-        ) from err
-    return beneficio
+    """Atualiza atributos de um benefício"""
+    pass
 
 
 @router.post(

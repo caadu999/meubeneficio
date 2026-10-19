@@ -20,5 +20,11 @@ def avaliar_bolsa_familia(
         motivos.append("Família não atende regra de renda")
 
     return Beneficio(
-        beneficio="Bolsa Família", atende=len(motivos) == 0, motivos=motivos
+        beneficio="Bolsa Família",
+        atende=len(motivos) == 0,
+        motivos=motivos,
+        renda_por_pessoa=renda,
+        limite_renda=limite,
+        idade_minima=None,
+        codigo="bolsa_familia",
     )
