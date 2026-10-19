@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from direitos.database.database import get_session
 from direitos.models.beneficio import Beneficio, Requisitos
 from direitos.schemas.beneficio import (
+    AtualizarLimite,
     BeneficioResposta,
     CriarBeneficio,
     CriarRequisitos,
@@ -17,7 +18,7 @@ from direitos.schemas.beneficio import (
 
 router = APIRouter(prefix="/beneficios", tags=["beneficios"])
 
-SessionDep = Annotated[Session, Depends(get_session)]
+type SessionDep = Annotated[Session, Depends(get_session)]
 
 
 @router.get("/", response_model=list[BeneficioResposta])
@@ -32,10 +33,16 @@ def carregar_beneficios(session: SessionDep):
     return dados
 
 
-@router.post("/", response_model=CriarBeneficio, status_code=HTTPStatus.CREATED)
+@router.post(
+    "/", response_model=CriarBeneficio, status_code=HTTPStatus.CREATED
+)
 def cadastrar_beneficio(beneficio: CriarBeneficio, session: SessionDep):
     """Cadastra novos benefícios"""
-    novo_beneficio = Beneficio(nome=beneficio.nome)
+    novo_beneficio = Beneficio(
+        nome=beneficio.nome,
+        limite_renda_por_pessoa=beneficio.limite_renda_por_pessoa,
+        codigo=beneficio.codigo,
+    )
 
     try:
         session.add(novo_beneficio)
@@ -45,12 +52,42 @@ def cadastrar_beneficio(beneficio: CriarBeneficio, session: SessionDep):
         session.rollback()
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT,
-            detail="Não foi possível cadastrar benefício devido a erro de conflito",
+            detail="Erro de conflito ao cadastrar",
         ) from err
     return novo_beneficio
 
 
-@router.post("/{beneficio_id}/requisitos", response_model=RespostaRequisito, status_code=HTTPStatus.CREATED)
+@router.patch("/{beneficio_id}", response_model=BeneficioResposta)
+def alterar_limite_beneficio(
+    beneficio_id: int, session: SessionDep, limite: AtualizarLimite
+):
+    """Altera o limite do benefício selecionado"""
+    beneficio = session.scalar(
+        select(Beneficio).where(Beneficio.id == beneficio_id)
+    )
+
+    if beneficio is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="Benefício não encontrado.",
+        )
+    try:
+        beneficio.limite_renda_por_pessoa = limite.novo_limite
+        session.commit()
+        session.refresh(beneficio)
+    except IntegrityError as err:
+        session.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT, detail="Erro ao atualizar limite"
+        ) from err
+    return beneficio
+
+
+@router.post(
+    "/{beneficio_id}/requisitos",
+    response_model=RespostaRequisito,
+    status_code=HTTPStatus.CREATED,
+)
 def criar_requisitos(
     beneficio_id: int,
     requisitos: CriarRequisitos,
@@ -116,7 +153,7 @@ def deletar_requisito(
         session.rollback()
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT,
-            detail="Não foi possível deletar requisito devido a erro de conflito",
+            detail="Erro de conflito ao deletar",
         ) from err
 
     return {"message": "Requisito deletado com sucesso!"}
@@ -141,6 +178,6 @@ def deletar_beneficio(beneficio_id: int, session: SessionDep):
         session.rollback()
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT,
-            detail="Não foi possível deletar requisito devido a erro de conflito",
+            detail="Erro de conflito ao deletar",
         ) from err
     return {"message": "Benefício deletado com sucesso!"}

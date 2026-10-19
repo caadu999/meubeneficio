@@ -4,15 +4,17 @@ from direitos.motor.calcular_renda_por_pessoa import calcular_renda_por_pessoa
 from direitos.schemas.beneficio import Beneficio, FamiliaEntrada
 
 
-def avaliar_bpc(familia: FamiliaEntrada, limite_renda: Decimal) -> Beneficio:
+def avaliar_bpc(
+    familia: FamiliaEntrada, limite_renda_bpc: Decimal
+) -> Beneficio:
     motivos = []
     idade_min = 65
-    atende_regra = familia.idade < idade_min or familia.pcd
+    atende_regra = familia.idade >= idade_min or familia.pcd
 
     renda = calcular_renda_por_pessoa(
         familia.renda_familiar_mensal, familia.quantidade_pessoas
     )
-    atende_renda = renda <= limite_renda
+    atende_renda = renda <= limite_renda_bpc
     atende = atende_renda and atende_regra
 
     if not atende_regra:
