@@ -34,6 +34,10 @@ class CriarBeneficio(BaseModel):
         decimal_places=2,
     )
     codigo: str
+    idade_minima: int | None = Field(
+        ge=0,
+        default=None,
+    )
 
 
 class RespostaRequisito(CriarRequisitos):
@@ -45,7 +49,23 @@ class BeneficioResposta(BaseModel):
     nome: str
     requisito: list[RespostaRequisito]
     limite_renda_por_pessoa: Decimal
+    idade_minima: int | None
 
 
 class AtualizarLimite(BaseModel):
     novo_limite: Decimal = Field(ge=0, decimal_places=2)
+
+
+class CriarParametro(BaseModel):
+    nome: str
+    valor: Decimal = Field(
+        ge=0,
+        decimal_places=2,
+        max_digits=10,
+    )
+
+
+class ParametroPublic(BaseModel):
+    id: int
+    nome: str
+    valor: Decimal

@@ -30,6 +30,7 @@ class Beneficio(Base):
         nullable=True,
     )
     codigo: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    idade_minima: Mapped[int | None] = mapped_column(nullable=True)
 
 
 class Requisitos(Base):
@@ -42,3 +43,10 @@ class Requisitos(Base):
         )
     )
     beneficio = relationship("Beneficio", back_populates="requisito")
+
+
+class ParametrosGerais(Base):
+    __tablename__ = "parametros"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String, unique=True)
+    valor: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)

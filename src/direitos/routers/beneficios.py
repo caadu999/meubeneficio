@@ -42,6 +42,7 @@ def cadastrar_beneficio(beneficio: CriarBeneficio, session: SessionDep):
         nome=beneficio.nome,
         limite_renda_por_pessoa=beneficio.limite_renda_por_pessoa,
         codigo=beneficio.codigo,
+        idade_minima=beneficio.idade_minima,
     )
 
     try:
