@@ -44,6 +44,15 @@ class CriarBeneficio(BaseModel):
     )
 
 
+class AtualizarBeneficio(BaseModel):
+    nome: str | None = Field(min_length=1)
+    limite_renda_por_pesoa: Decimal | None = Field(
+        ge=0, decimal_places=2, max_digits=10
+    )
+    codigo: str | None = Field(min_length=1)
+    idade_minima: int | None = Field(ge=0, deafult=None)
+
+
 class RespostaRequisito(CriarRequisitos):
     id: int
 

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from direitos.database.database import get_session
 from direitos.models.beneficio import Beneficio, Requisitos
 from direitos.schemas.beneficio import (
+    AtualizarBeneficio,
     BeneficioResposta,
     CriarBeneficio,
     CriarRequisitos,
@@ -59,10 +60,40 @@ def cadastrar_beneficio(beneficio: CriarBeneficio, session: SessionDep):
 
 @router.patch("/{beneficio_id}", response_model=BeneficioResposta)
 def atualizar_atributos(
-    beneficio_id: int, session: SessionDep, beneficio: CriarBeneficio
+    beneficio_id: int, session: SessionDep, beneficio: AtualizarBeneficio
 ):
     """Atualiza atributos de um benefício"""
-    pass
+    beneficioDB = session.scalar(
+        select(Beneficio).where(Beneficio.id == beneficio_id)
+    )
+
+    if beneficioDB is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Benefício não encontrado"
+        )
+    alteracoes = beneficio.model_dump(exclude_unset=True)
+
+    for campo in ("nome", "codigo"):
+        if campo in alteracoes and alteracoes[campo] is None:
+            raise HTTPException(
+                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                detail=f"O campo {campo} não pode ser null",
+            )
+
+    for key, value in alteracoes.items():
+        setattr(beneficioDB, key, value)
+
+    try:
+        session.commit()
+        session.refresh(beneficioDB)
+    except IntegrityError as err:
+        session.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Não foi possível atualizar o benefício",
+        ) from err
+
+    return beneficioDB
 
 
 @router.post(
