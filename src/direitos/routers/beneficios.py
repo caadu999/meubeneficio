@@ -15,6 +15,7 @@ from direitos.schemas.beneficio import (
     CriarRequisitos,
     RespostaRequisito,
 )
+from direitos.utils.senha_hash import get_current_active_user
 
 router = APIRouter(prefix="/beneficios", tags=["beneficios"])
 
@@ -23,18 +24,17 @@ type SessionDep = Annotated[Session, Depends(get_session)]
 
 @router.get("/", response_model=list[BeneficioResposta])
 def carregar_beneficios(session: SessionDep):
+    """Retorna benefícios cadastrados"""
     dados = session.scalars(select(Beneficio)).all()
-
-    if not dados:
-        raise HTTPException(
-            status_code=HTTPStatus.OK, detail="Não há dados para mostrar"
-        )
 
     return dados
 
 
 @router.post(
-    "/", response_model=BeneficioResposta, status_code=HTTPStatus.CREATED
+    "/",
+    response_model=BeneficioResposta,
+    dependencies=[Depends(get_current_active_user)],
+    status_code=HTTPStatus.CREATED,
 )
 def cadastrar_beneficio(beneficio: CriarBeneficio, session: SessionDep):
     """Cadastra novos benefícios"""
@@ -58,7 +58,11 @@ def cadastrar_beneficio(beneficio: CriarBeneficio, session: SessionDep):
     return novo_beneficio
 
 
-@router.patch("/{beneficio_id}", response_model=BeneficioResposta)
+@router.patch(
+    "/{beneficio_id}",
+    response_model=BeneficioResposta,
+    dependencies=[Depends(get_current_active_user)],
+)
 def atualizar_atributos(
     beneficio_id: int, session: SessionDep, beneficio: AtualizarBeneficio
 ):
@@ -100,6 +104,7 @@ def atualizar_atributos(
     "/{beneficio_id}/requisitos",
     response_model=RespostaRequisito,
     status_code=HTTPStatus.CREATED,
+    dependencies=[Depends(get_current_active_user)],
 )
 def criar_requisitos(
     beneficio_id: int,
@@ -131,7 +136,10 @@ def criar_requisitos(
     return novo_requisito
 
 
-@router.delete("/{beneficio_id}/{requisito_id}")
+@router.delete(
+    "/{beneficio_id}/{requisito_id}",
+    dependencies=[Depends(get_current_active_user)],
+)
 def deletar_requisito(
     requisito_id: int,
     beneficio_id: int,
@@ -150,8 +158,8 @@ def deletar_requisito(
 
     requisito = session.scalar(
         select(Requisitos).where(
-            Requisitos.id == requisito_id
-            and Requisitos.beneficio_id == beneficio_id
+            Requisitos.id == requisito_id,
+            Requisitos.beneficio_id == beneficio_id,
         )
     )
 
@@ -172,7 +180,9 @@ def deletar_requisito(
     return {"message": "Requisito deletado com sucesso!"}
 
 
-@router.delete("/{beneficio_id}")
+@router.delete(
+    "/{beneficio_id}", dependencies=[Depends(get_current_active_user)]
+)
 def deletar_beneficio(beneficio_id: int, session: SessionDep):
     """Deleta um benefício pela ID"""
 

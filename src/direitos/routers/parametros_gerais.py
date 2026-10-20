@@ -13,6 +13,7 @@ from direitos.schemas.beneficio import (
     CriarParametro,
     ParametroPublic,
 )
+from direitos.utils.senha_hash import get_current_active_user
 
 router = APIRouter(prefix="/gerais", tags=["parâmetros gerais"])
 
@@ -35,7 +36,10 @@ def carregar_parametros(session: SessionDB):
 
 
 @router.post(
-    "/", response_model=ParametroPublic, status_code=HTTPStatus.CREATED
+    "/",
+    response_model=ParametroPublic,
+    status_code=HTTPStatus.CREATED,
+    dependencies=[Depends(get_current_active_user)],
 )
 def cadastrar_parametro(session: SessionDB, parametro: CriarParametro):
     """Cadastra novos parâmetros"""
@@ -57,7 +61,11 @@ def cadastrar_parametro(session: SessionDB, parametro: CriarParametro):
     return novo_parametro
 
 
-@router.patch("/{parametro_id}", response_model=ParametroPublic)
+@router.patch(
+    "/{parametro_id}",
+    response_model=ParametroPublic,
+    dependencies=[Depends(get_current_active_user)],
+)
 def atualizar_parametro(
     session: SessionDB, parametro_id: int, parametro: AtualizarParametro
 ):
@@ -92,7 +100,9 @@ def atualizar_parametro(
     return parametroDB
 
 
-@router.delete("/{parametro_id}")
+@router.delete(
+    "/{parametro_id}", dependencies=[Depends(get_current_active_user)]
+)
 def deletar_parametro(session: SessionDB, parametro_id: int):
     """Deleta um parâmetro pela ID"""
     parametro = session.scalar(
