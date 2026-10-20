@@ -8,7 +8,11 @@ from sqlalchemy.orm import Session
 
 from direitos.database.database import get_session
 from direitos.models.beneficio import ParametrosGerais
-from direitos.schemas.beneficio import CriarParametro, ParametroPublic
+from direitos.schemas.beneficio import (
+    AtualizarParametro,
+    CriarParametro,
+    ParametroPublic,
+)
 
 router = APIRouter(prefix="/gerais", tags=["parâmetros gerais"])
 
@@ -51,6 +55,41 @@ def cadastrar_parametro(session: SessionDB, parametro: CriarParametro):
         ) from err
 
     return novo_parametro
+
+
+@router.patch("/{parametro_id}", response_model=ParametroPublic)
+def atualizar_parametro(
+    session: SessionDB, parametro_id: int, parametro: AtualizarParametro
+):
+    parametroDB = session.scalar(
+        select(ParametrosGerais).where(ParametrosGerais.id == parametro_id)
+    )
+
+    if parametroDB is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Parâmetro não encontrado"
+        )
+    alteracoes = parametro.model_dump(exclude_unset=True)
+
+    for campo in ("nome", "valor"):
+        if campo in alteracoes and alteracoes[campo] is None:
+            raise HTTPException(
+                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                detail=f"O campo {campo} não pode ser null",
+            )
+    for key, value in alteracoes.items():
+        setattr(parametroDB, key, value)
+
+    try:
+        session.commit()
+        session.refresh(parametroDB)
+    except IntegrityError as err:
+        session.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Não foi possível alterar devido a um conflito",
+        ) from err
+    return parametroDB
 
 
 @router.delete("/{parametro_id}")

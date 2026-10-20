@@ -17,6 +17,6 @@ def verificar_cadastro_parametro(
     if parametro is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail="Benefício não encontrado",
+            detail=f"Parâmetro não encontrado: {nome}",
         )
     return parametro

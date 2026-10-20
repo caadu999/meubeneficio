@@ -15,6 +15,6 @@ def verificar_cadastro_beneficio(session: Session, codigo: str) -> Beneficio:
     if beneficio is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail="Benefício não encontrado",
+            detail=f"Benefício não encontrado: {codigo}",
         )
     return beneficio
