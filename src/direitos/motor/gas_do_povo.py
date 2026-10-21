@@ -14,17 +14,23 @@ def avaliar_gas_do_povo(
         familia.quantidade_pessoas,
     )
 
+    atende_quantidade = familia.quantidade_pessoas >= 2
+    atende_cadunico = familia.inscrita_no_cadunico
     limite_renda = salario_minimo / 2
     atende_renda = renda_por_pessoa <= limite_renda
 
+    if not atende_quantidade:
+        motivos.append(
+            "O programa é voltado preferencialmente para famílias com 2 ou mais integrantes"
+        )
     if not atende_renda:
         motivos.append("Família não atende regra de renda")
-    if not familia.inscrita_no_cadunico:
-        motivos.append("Família não inscrita no Cadúnico")
+    if not atende_cadunico:
+        motivos.append("Precisa estar inscrito(a) no CadÚnico")
 
     return Beneficio(
-        beneficio="Gás do povo",
-        atende=len(motivos) == 0,
+        beneficio="Gás do Povo",
+        atende=not motivos,
         motivos=motivos,
         renda_por_pessoa=renda_por_pessoa,
         limite_renda=limite_renda,

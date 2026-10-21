@@ -4,11 +4,12 @@ from pydantic import BaseModel, Field
 
 
 class FamiliaEntrada(BaseModel):
-    inscrita_no_cadunico: bool
+    inscrita_no_cadunico: bool = Field(strict=True)
     renda_familiar_mensal: Decimal = Field(ge=0)
     quantidade_pessoas: int = Field(gt=0, strict=True)
-    idade: int = (Field(gt=0, strict=True),)
-    pcd: bool
+    idade: int = Field(gt=0, strict=True)
+    pcd: bool = Field(strict=True)
+    renda_individual_mensal: Decimal = Field(ge=0)
 
 
 class Beneficio(BaseModel):
@@ -45,12 +46,12 @@ class CriarBeneficio(BaseModel):
 
 
 class AtualizarBeneficio(BaseModel):
-    nome: str | None = Field(min_length=1)
-    limite_renda_por_pesoa: Decimal | None = Field(
-        ge=0, decimal_places=2, max_digits=10
+    nome: str | None = Field(min_length=1, default=None)
+    limite_renda_por_pessoa: Decimal | None = Field(
+        ge=0, decimal_places=2, max_digits=10, default=None
     )
-    codigo: str | None = Field(min_length=1)
-    idade_minima: int | None = Field(ge=0, deafult=None)
+    codigo: str | None = Field(min_length=1, default=None)
+    idade_minima: int | None = Field(ge=0, default=None)
 
 
 class RespostaRequisito(CriarRequisitos):

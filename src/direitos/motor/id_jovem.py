@@ -20,7 +20,7 @@ def verificar_id_jovem(
     if not atende_idade:
         motivos.append("Não atende requisito de idade")
     if not atende_cadUnico:
-        motivos.append("Você precista estar cadastrado(a) no CadÚnico")
+        motivos.append("Você precisa estar cadastrado(a) no CadÚnico")
 
     return Beneficio(
         beneficio="ID Jovem",

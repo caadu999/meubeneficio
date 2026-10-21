@@ -10,12 +10,13 @@ def avaliar_bpc(
     motivos = []
     limite_renda = salario_minimo / 4
     atende_regra = familia.idade >= idade_minima_bpc or familia.pcd
+    atende_cadunico = familia.inscrita_no_cadunico
 
     renda = calcular_renda_por_pessoa(
         familia.renda_familiar_mensal, familia.quantidade_pessoas
     )
     atende_renda = renda <= limite_renda
-    atende = atende_renda and atende_regra
+    atende = atende_renda and atende_regra and atende_cadunico
 
     if not atende_regra:
         motivos.append(
@@ -24,6 +25,9 @@ def avaliar_bpc(
     if not atende_renda:
         motivos.append("Renda por pessoa acima do limite")
 
+    if not atende_cadunico:
+        motivos.append("Precisa estar inscrito(a) no CadÚnico")
+
     return Beneficio(
         beneficio="BPC",
         atende=atende,
@@ -31,5 +35,5 @@ def avaliar_bpc(
         limite_renda=limite_renda,
         renda_por_pessoa=renda,
         idade_minima=idade_minima_bpc,
-        codigo="bpc"
+        codigo="bpc",
     )
