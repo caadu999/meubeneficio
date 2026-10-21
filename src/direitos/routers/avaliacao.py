@@ -47,6 +47,8 @@ def avaliar(familia: FamiliaEntrada, session: SessionDB):
             detail="Idade mínima não cadastrada",
         )
 
+    verificar_cadastro_beneficio(session, "id_jovem")
+
     beneficios = verificar_beneficios(
         limite=limite,
         familia=familia,

@@ -14,7 +14,8 @@ def avaliar_gas_do_povo(
         familia.quantidade_pessoas,
     )
 
-    atende_renda = renda_por_pessoa <= salario_minimo / 2
+    limite_renda = salario_minimo / 2
+    atende_renda = renda_por_pessoa <= limite_renda
 
     if not atende_renda:
         motivos.append("Família não atende regra de renda")
@@ -26,7 +27,7 @@ def avaliar_gas_do_povo(
         atende=len(motivos) == 0,
         motivos=motivos,
         renda_por_pessoa=renda_por_pessoa,
-        limite_renda=salario_minimo / 2,
+        limite_renda=limite_renda,
         idade_minima=None,
-        codigo="gas_do_povo"
+        codigo="gas_do_povo",
     )

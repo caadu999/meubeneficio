@@ -15,7 +15,7 @@ class Beneficio(BaseModel):
     beneficio: str
     atende: bool
     motivos: list[str]
-    renda_por_pessoa: Decimal
+    renda_por_pessoa: Decimal | None
     limite_renda: Decimal
     idade_minima: int | None
     codigo: str
@@ -61,7 +61,7 @@ class BeneficioResposta(BaseModel):
     id: int
     nome: str
     requisito: list[RespostaRequisito]
-    limite_renda_por_pessoa: Decimal
+    limite_renda_por_pessoa: Decimal | None
     idade_minima: int | None
     codigo: str
 

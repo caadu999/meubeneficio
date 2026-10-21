@@ -136,6 +136,49 @@ def criar_requisitos(
     return novo_requisito
 
 
+@router.put(
+    "/{beneficio_id}/{requisito_id}",
+    dependencies=[Depends(get_current_active_user)],
+    response_model=RespostaRequisito,
+)
+def atualizar_requisito(
+    session: SessionDep,
+    beneficio_id: int,
+    requisito_id: int,
+    requisitos: CriarRequisitos,
+):
+    beneficio = session.scalar(
+        select(Beneficio).where(Beneficio.id == beneficio_id)
+    )
+    if beneficio is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Benefício não encontrado"
+        )
+    requisito = session.scalar(
+        select(Requisitos).where(
+            Requisitos.id == requisito_id,
+            Requisitos.beneficio_id == beneficio_id,
+        )
+    )
+    if requisito is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Requisito não encontrado"
+        )
+    requisito.descricao = requisitos.descricao
+
+    try:
+        session.commit()
+        session.refresh(requisito)
+    except IntegrityError as err:
+        session.rollback()
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT,
+            detail="Não foi possível alterar o requisito",
+        ) from err
+
+    return requisito
+
+
 @router.delete(
     "/{beneficio_id}/{requisito_id}",
     dependencies=[Depends(get_current_active_user)],
