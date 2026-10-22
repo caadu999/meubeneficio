@@ -74,6 +74,33 @@ from direitos.schemas.beneficio import FamiliaEntrada
             [],
             id="dados-diferentes-para-verificar-motor",
         ),
+        pytest.param(
+            20,
+            Decimal("3242.00"),
+            True,
+            Decimal("1621.00"),
+            True,
+            [],
+            id="renda-exatamente-no-limite",
+        ),
+        pytest.param(
+            20,
+            Decimal("3242.01"),
+            True,
+            Decimal("1621.00"),
+            False,
+            ["Não atende requisitos de renda"],
+            id="renda-um-centavo-acima-do-limite",
+        ),
+        pytest.param(
+            20,
+            Decimal("1000.00"),
+            False,
+            Decimal("1621.00"),
+            False,
+            ["Você precisa estar cadastrado(a) no CadÚnico"],
+            id="somente-cadunico-nao-atende",
+        ),
     ],
 )
 def test_verificar_id_jovem_cenarios(
@@ -98,3 +125,5 @@ def test_verificar_id_jovem_cenarios(
     assert resultado.atende is esperado_atende
     assert resultado.motivos == esperado_motivos
     assert resultado.limite_renda == salario_minimo * 2
+    assert resultado.renda_por_pessoa is None
+    assert resultado.idade_minima == 15

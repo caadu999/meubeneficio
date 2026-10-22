@@ -81,8 +81,10 @@ class CriarParametro(BaseModel):
 
 
 class AtualizarParametro(BaseModel):
-    nome: str | None = Field(min_length=1)
-    valor: Decimal | None = Field(ge=0, max_digits=10, decimal_places=2)
+    nome: str | None = (Field(min_length=1, default=None),)
+    valor: Decimal | None = Field(
+        ge=0, max_digits=10, decimal_places=2, default=None
+    )
 
 
 class ParametroPublic(BaseModel):
