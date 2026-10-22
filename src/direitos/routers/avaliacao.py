@@ -47,7 +47,13 @@ def avaliar(familia: FamiliaEntrada, session: SessionDB):
             detail="Idade mínima não cadastrada",
         )
 
-    verificar_cadastro_beneficio(session, "id_jovem")
+    id_jovem = verificar_cadastro_beneficio(session, "id_jovem")
+    idade_minima_id_jovem = id_jovem.idade_minima
+    if idade_minima_id_jovem is None:
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Idade mínima não cadastrada",
+        )
 
     carteira_da_pessoa_idosa = verificar_cadastro_beneficio(
         session, "carteira_da_pessoa_idosa"
@@ -66,5 +72,6 @@ def avaliar(familia: FamiliaEntrada, session: SessionDB):
         idade_minima_bpc=idade_minima_bpc,
         salario_minimo=salario_minimo,
         idade_minima_cpi=idade_minima_cpi,
+        idade_minima_id_jovem=idade_minima_id_jovem,
     )
     return {"beneficios": beneficios}

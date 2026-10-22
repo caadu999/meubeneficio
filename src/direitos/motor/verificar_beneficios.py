@@ -10,12 +10,14 @@ from direitos.motor.id_jovem import verificar_id_jovem
 from direitos.schemas.beneficio import Beneficio, FamiliaEntrada
 
 
-def verificar_beneficios(
+def verificar_beneficios(  # noqa: PLR0913
     limite: Decimal,
     familia: FamiliaEntrada,
     salario_minimo: Decimal,
     idade_minima_bpc: int,
     idade_minima_cpi: int,
+    *,
+    idade_minima_id_jovem: int,
 ) -> list[Beneficio]:
 
     bolsa = avaliar_bolsa_familia(familia=familia, limite=limite)
@@ -26,7 +28,9 @@ def verificar_beneficios(
         idade_minima_bpc=idade_minima_bpc,
     )
     id_jovem = verificar_id_jovem(
-        familia=familia, salario_minimo=salario_minimo
+        familia=familia,
+        salario_minimo=salario_minimo,
+        idade_minima=idade_minima_id_jovem,
     )
 
     cpi = avaliar_carteira_da_pessoa_idosa(

@@ -7,7 +7,7 @@ class FamiliaEntrada(BaseModel):
     inscrita_no_cadunico: bool = Field(strict=True)
     renda_familiar_mensal: Decimal = Field(ge=0)
     quantidade_pessoas: int = Field(gt=0, strict=True)
-    idade: int = Field(gt=0, strict=True)
+    idade: int = Field(ge=0, strict=True)
     pcd: bool = Field(strict=True)
     renda_individual_mensal: Decimal = Field(ge=0)
 
@@ -81,7 +81,7 @@ class CriarParametro(BaseModel):
 
 
 class AtualizarParametro(BaseModel):
-    nome: str | None = (Field(min_length=1, default=None),)
+    nome: str | None = Field(min_length=1, default=None)
     valor: Decimal | None = Field(
         ge=0, max_digits=10, decimal_places=2, default=None
     )

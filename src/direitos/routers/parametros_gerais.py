@@ -28,10 +28,6 @@ def carregar_parametros(session: SessionDB):
 
     parametros = session.scalars(select(ParametrosGerais)).all()
 
-    if not parametros:
-        raise HTTPException(
-            status_code=HTTPStatus.OK, detail="Não há parametros registrados"
-        )
     return parametros
 
 

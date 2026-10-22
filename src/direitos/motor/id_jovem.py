@@ -2,10 +2,13 @@ from decimal import Decimal
 
 from direitos.schemas.beneficio import Beneficio, FamiliaEntrada
 
+IDADE_MAXIMA_ID_JOVEM = 29
+
 
 def verificar_id_jovem(
     familia: FamiliaEntrada,
     salario_minimo: Decimal,
+    idade_minima: int = 15,
 ) -> Beneficio:
     motivos = []
 
@@ -13,7 +16,7 @@ def verificar_id_jovem(
 
     atende_cadUnico = familia.inscrita_no_cadunico
     atende_renda = familia.renda_familiar_mensal <= limite_renda
-    atende_idade = familia.idade >= 15 and familia.idade <= 29
+    atende_idade = idade_minima <= familia.idade <= IDADE_MAXIMA_ID_JOVEM
 
     if not atende_renda:
         motivos.append("Não atende requisitos de renda")
@@ -28,6 +31,6 @@ def verificar_id_jovem(
         motivos=motivos,
         renda_por_pessoa=None,
         limite_renda=limite_renda,
-        idade_minima=15,
+        idade_minima=idade_minima,
         codigo="id_jovem",
     )

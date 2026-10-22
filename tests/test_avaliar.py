@@ -86,6 +86,11 @@ def test_avaliar_sem_salario_minimo(
             "Limite não cadastrado",
         ),
         (
+            "id_jovem",
+            "idade_minima",
+            "Idade mínima não cadastrada",
+        ),
+        (
             "bpc",
             "idade_minima",
             "Idade mínima não cadastrada",
@@ -128,3 +133,30 @@ def test_avaliar_rejeita_quantidade_zero(
         erro["loc"] == ["body", "quantidade_pessoas"]
         for erro in response.json()["detail"]
     )
+
+
+def test_avaliar_bebe_com_deficiencia(
+    client, dados_avaliacao, entrada_familia
+):
+    entrada_familia.update(idade=0, pcd=True)
+    response = client.post("/avaliar/", json=entrada_familia)
+    assert response.status_code == HTTPStatus.OK
+    bpc = next(
+        b for b in response.json()["beneficios"] if b["codigo"] == "bpc"
+    )
+    assert bpc["atende"] is True
+
+
+def test_avaliar_utiliza_idade_id_jovem_do_banco(
+    client, session_teste, dados_avaliacao, entrada_familia
+):
+    idade_minima = 21
+    dados_avaliacao["beneficios"]["id_jovem"].idade_minima = idade_minima
+    session_teste.flush()
+    response = client.post("/avaliar/", json=entrada_familia)
+    assert response.status_code == HTTPStatus.OK
+    jovem = next(
+        b for b in response.json()["beneficios"] if b["codigo"] == "id_jovem"
+    )
+    assert jovem["atende"] is False
+    assert jovem["idade_minima"] == idade_minima
